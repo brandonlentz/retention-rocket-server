@@ -3,6 +3,7 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
 const cors = require('cors');
+const fs = require('fs');
 
 const auth = 'brd-customer-hl_ab1190c6-zone-scraping_browser:jlres78sa3q0';
 const app = express();
@@ -21,12 +22,14 @@ app.post('/api/scrape', async (req, res) => {
     }
 
     let quoteCount = 0;
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({ 
+        headless: false 
+    });
 
-    const progressiveQuoteDate = await progressive(browser, lastName, emailAddress, birthDay, zipCode);
-    const geicoQuoteDate = await geico(browser, lastName, emailAddress, birthDay, zipCode);
-    const stateFarmQuoteDate = await stateFarm(browser, firstName, lastName, emailAddress, birthDay, zipCode);
-    const farmersQuoteDate = await farmers(browser, lastName, emailAddress, birthDay, zipCode);
+     const progressiveQuoteDate = await progressive(browser, lastName, emailAddress, birthDay, zipCode);
+     const geicoQuoteDate = await geico(browser, lastName, emailAddress, birthDay, zipCode);
+     const stateFarmQuoteDate = await stateFarm(browser, firstName, lastName, emailAddress, birthDay, zipCode);
+   // const farmersQuoteDate = await farmers(browser, lastName, emailAddress, birthDay, zipCode);
     
     if (progressiveQuoteDate) {
         quoteCount++;
@@ -40,9 +43,9 @@ app.post('/api/scrape', async (req, res) => {
       if (stateFarmQuoteDate) {
         quoteCount++;
       }
-      if (farmersQuoteDate) {
-        quoteCount++;
-      }
+    //   if (farmersQuoteDate) {
+    //     quoteCount++;
+    //   }
     //   if (travelersQuoteDate) {
     //     quoteCount++;
     //   }
@@ -66,9 +69,10 @@ const progressive = async (browser, lastName, emailAddress, birthDay, zipCode) =
   await page.type('input#zipCode-email', zipCode);
   await page.click('#qsButton-email');
 
-  await page.waitForTimeout(5000);
 
-  const noQuote = '#DialogTitle';
+await page.waitForTimeout(3000);
+  const noQuote = '.title';
+
 
   if (await page.$(noQuote)) {
     console.log('You got NO quote!');
@@ -174,15 +178,28 @@ const farmers = async (browser, lastName, emailAddress, birthDay, zipCode) => {
   const buttonElement = await page5.$x('//*[@id="ffq-tab-panel-2"]/div/form/div[5]/button');
   await buttonElement[0].click();
 
-  const noQuote = '//*[@id="landingErrorInfoHeading"]';
-  if (await page5.waitForXPath('//*[@id="landingErrorInfoHeading"]')) {
-    console.log('No recent farmers quotes!');
-    return null;
-  } else {
-    const farmersQuoteDate = true;
-    console.log(`Farmers: ${farmersQuoteDate}`);
-    return farmersQuoteDate;
-  }
+await page5.waitForTimeout(5000);
+const noQuote = '//*[@id="landingErrorInfoHeading"]';
+if ( await page5.waitForXPath('//*[@id="landingErrorInfoHeading"]'))
+{
+  console.log('No recent farmers quotes!');
+  return null; // Return null if there is no quote
+  
+}
+else {
+  const farmersQuoteDate = true;
+  console.log(`Farmers: ${farmersQuoteDate}`);
+}
+
+
+//   if (await page5.$(noQuote)) {
+//     console.log('No recent farmers quotes!');
+//     return null;
+//   } else {
+//     const farmersQuoteDate = true;
+//     console.log(`Farmers: ${farmersQuoteDate}`);
+//     return farmersQuoteDate;
+//   }
 };
 
 const travelers = async (browser, lastName, emailAddress, birthDay, zipCode) => {
