@@ -2,13 +2,24 @@ const express = require('express');
 const puppeteer = require('puppeteer');
 const cors = require('cors');
 const fs = require('fs');
+const helmet = require('helmet');
 const corsOptions = require('./config/corsOptions')
+
+
 
 const auth = 'brd-customer-hl_ab1190c6-zone-scraping_browser:jlres78sa3q0';
 const app = express();
 const port = 3000;
 app.use(cors(corsOptions));
 app.use(express.json());
+// Use helmet middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      upgradeInsecureRequests: [],
+    },
+  },
+}));
 
 app.post('/api/scrape', async (req, res) => {
   const { firstName, lastName, emailAddress, birthDay, zipCode } = req.body;
