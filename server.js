@@ -33,7 +33,7 @@ app.post('/api/scrape', async (req, res) => {
 
     let quoteCount = 0;
     const browser = await puppeteer.launch({ 
-       headless: false 
+     //  headless: false 
     });
 
      const progressiveQuoteDate = await progressive(browser, lastName, emailAddress, birthDay, zipCode);
