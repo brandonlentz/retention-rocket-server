@@ -2,11 +2,12 @@ const express = require('express');
 const puppeteer = require('puppeteer');
 const cors = require('cors');
 const fs = require('fs');
+const corsOptions = require('./config/corsOptions')
 
 const auth = 'brd-customer-hl_ab1190c6-zone-scraping_browser:jlres78sa3q0';
 const app = express();
 const port = 3000;
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.post('/api/scrape', async (req, res) => {
@@ -21,7 +22,7 @@ app.post('/api/scrape', async (req, res) => {
 
     let quoteCount = 0;
     const browser = await puppeteer.launch({ 
-       // headless: false 
+       headless: false 
     });
 
      const progressiveQuoteDate = await progressive(browser, lastName, emailAddress, birthDay, zipCode);
